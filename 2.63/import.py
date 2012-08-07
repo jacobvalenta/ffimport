@@ -1,19 +1,33 @@
 import bpy
+import struct
 
-def load_p(filepath, settings):
+def load_p(filepath, debug):
     f = open(filepath, 'rb')
-        #TODO
+
+    header = f.read(64)
+    runtimeData = f.read(64) # usually not read, but may be used in export.
+    header = struct.unpack('llllllllllllllll', header) # convert binary header to integers
+
+    if debug == True:
+        print('Verticies: \t', header[3])
+        print('Edges: \t\t', header[8])
+        print('Faces: \t\t', 11)
+
     f.close()
 
-def start_import(context, filepath, settings):
+def start_import(context, filepath, debug):
     #first thing first is to determin the type of file we are working with
+    filepath = filepath.replace('\\', '/')
     filename = filepath.split('/')[-1]
     filetype = filename.split('.')[-1]
 
-    if settings == True:
+    if debug == True:
         print(filename)
+        print(filetype)
 
     #which ever filetype we are using, call the appropriate function
+    if filetype == 'p':
+        load_p(filepath, debug)
 
     return {'FINISHED'}
 
