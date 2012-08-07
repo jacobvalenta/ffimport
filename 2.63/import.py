@@ -20,24 +20,24 @@ from bpy.props import StringProperty, BoolProperty, EnumProperty
 from bpy.types import Operator
 
 
-class ImportSomeData(Operator, ImportHelper):
-    '''This appears in the tooltip of the operator and in the generated docs'''
-    bl_idname = "import_test.some_data"  # important since its how bpy.ops.import_test.some_data is constructed
-    bl_label = "Import Some Data"
 
-    # ImportHelper mixin class uses this
-    filename_ext = ".txt"
+#main class to setup import window for blender
+class ffimport(Operator, ImportHelper):
+    '''Import Final Fatnasy files (.hrc .rsd .p .tex .a)'''
+    bl_idname = "import_test.some_data"  # important since its how bpy.ops.import_test.some_data is constructed
+    bl_label = "Import"
+
+    filename_ext = ".p" #Not quite sure how blender uses this
 
     filter_glob = StringProperty(
-            default="*.txt",
+            default="*.p",
             options={'HIDDEN'},
             )
 
-    # List of operator properties, the attributes will be assigned
-    # to the class instance from the operator settings before calling.
-    use_setting = BoolProperty(
-            name="Example Boolean",
-            description="Example Tooltip",
+    # Create the User interface 
+    debug_s = BoolProperty(
+            name="Debug",
+            description="Toggels debug info sent to the console.",
             default=True,
             )
 
@@ -55,18 +55,16 @@ class ImportSomeData(Operator, ImportHelper):
 
 # Only needed if you want to add into a dynamic menu
 def menu_func_import(self, context):
-    self.layout.operator(ImportSomeData.bl_idname, text="Text Import Operator")
+    self.layout.operator(ffimport.bl_idname, text="Final Fantasy")
 
 
 def register():
-    bpy.utils.register_class(ImportSomeData)
+    bpy.utils.register_class(ffimport)
     bpy.types.INFO_MT_file_import.append(menu_func_import)
 
-
 def unregister():
-    bpy.utils.unregister_class(ImportSomeData)
+    bpy.utils.unregister_class(ffimport)
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
-
 
 if __name__ == "__main__":
     register()
