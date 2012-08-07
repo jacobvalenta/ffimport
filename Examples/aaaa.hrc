@@ -1,0 +1,108 @@
+:HEADER_BLOCK 2
+:SKELETON n_cloud_sk
+:BONES 21
+
+hip
+root
+1.7457236
+1 AAAB
+
+chest
+hip
+5.181539
+1 AAAD
+
+head
+chest
+6.8333898
+1 AAAF
+
+l_chest
+hip
+4.984537
+0 
+
+l_collar
+l_chest
+2.30646
+0 
+
+l_uparm
+l_collar
+2.7334232
+1 AABE
+
+l_foarm
+l_uparm
+4.6006985
+1 AACA
+
+l_hand
+l_foarm
+2.2786045
+1 AACC
+
+r_chest
+hip
+4.984537
+0 
+
+r_collar
+r_chest
+2.30646
+0 
+
+r_uparm
+r_collar
+2.7334232
+1 AACE
+
+r_foarm
+r_uparm
+4.6006985
+1 AADA
+
+r_hand
+r_foarm
+2.2786045
+1 AADC
+
+l_hip
+root
+1.9816544
+0 
+
+l_femur
+l_hip
+5.2886734
+1 AADE
+
+l_tibia
+l_femur
+7.7258
+1 AAEA
+
+l_foot
+l_tibia
+6.905876
+1 AAEC
+
+r_hip
+root
+1.9816544
+0 
+
+r_femur
+r_hip
+5.2886734
+1 AAEE
+
+r_tibia
+r_femur
+7.7258
+1 AAFA
+
+r_foot
+r_tibia
+6.905876
+1 AAFC

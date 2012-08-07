@@ -1,14 +1,19 @@
 import bpy
 
-
-def read_some_data(context, filepath, use_some_setting):
-    print("running read_some_data...")
-    f = open(filepath, 'r', encoding='utf-8')
-    data = f.read()
+def load_p(filepath, settings):
+    f = open(filepath, 'rb')
+        #TODO
     f.close()
 
-    # would normally load the data here
-    print(data)
+def start_import(context, filepath, settings):
+    #first thing first is to determin the type of file we are working with
+    filename = filepath.split('/')[-1]
+    filetype = filename.split('.')[-1]
+
+    if settings == True:
+        print(filename)
+
+    #which ever filetype we are using, call the appropriate function
 
     return {'FINISHED'}
 
@@ -41,19 +46,11 @@ class ffimport(Operator, ImportHelper):
             default=True,
             )
 
-    type = EnumProperty(
-            name="Example Enum",
-            description="Choose between two items",
-            items=(('OPT_A', "First Option", "Description one"),
-                   ('OPT_B', "Second Option", "Description two")),
-            default='OPT_A',
-            )
-
     def execute(self, context):
-        return read_some_data(context, self.filepath, self.use_setting)
+        return start_import(context, self.filepath, self.debug_s)
 
 
-# Only needed if you want to add into a dynamic menu
+# Adds a listing in the Import 
 def menu_func_import(self, context):
     self.layout.operator(ffimport.bl_idname, text="Final Fantasy")
 
