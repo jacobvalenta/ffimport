@@ -8,10 +8,26 @@ def load_p(filepath, debug):
     runtimeData = f.read(64) # usually not read, but may be used in export.
     header = struct.unpack('llllllllllllllll', header) # convert binary header to integers
 
+    version = header[0]
+    vertexType = header[2]
+    numVertices = header[3]
+    numNormals = header[4]
+    numUnknown1 = header[5]
+    numTexCoords = header[6]
+    numVertexColors = header[7]
+    numEdges = header[8]
+    numUnknown2 = header[9]
+    numUnknown3 = header[10]
+    numPolygons = header[11]
+    numHundreds = header[12]
+    numGroups = header[13]
+    numBoundingBoxes = header[14]
+    normIndexTableFlag = header[15]
+
     if debug == True:
-        print('Verticies: \t', header[3])
-        print('Edges: \t\t', header[8])
-        print('Faces: \t\t', 11)
+        print('Verticies: \t', numVertices)
+        print('Edges: \t\t', numEdges)
+        print('Faces: \t\t', numPolygons)
 
     f.close()
 
@@ -64,7 +80,7 @@ class ffimport(Operator, ImportHelper):
         return start_import(context, self.filepath, self.debug_s)
 
 
-# Adds a listing in the Import 
+# Adds a listing in the Import menu
 def menu_func_import(self, context):
     self.layout.operator(ffimport.bl_idname, text="Final Fantasy")
 
