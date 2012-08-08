@@ -42,19 +42,26 @@ def load_p(filepath, debug, wireframe):
 
     #Load Edges
     edges = []
-
     f.seek( 128 + (12 * numVertices) + (12 * numNormals) + (12 * numUnknown1) + (8 * numTexCoords) + (4 * numVertexColors) + (4 * numPolygons))
-
     for i in range(numEdges):
         edge = list(struct.unpack('hh', f.read(4)))
         if debug == True:
             print(edge)
         edges.append(edge)
 
+    # Load Faces
+    polys = []
+    for i in range(numPolygons):
+        poly = list(struct.unpack('hhhhhhhhhhl', f.read(24)))
+        poly = [poly[1], poly[2], poly[3]]
+        if debug == True:
+            print(poly)
+        polys.append(poly)
+
     if wireframe == True:
         create_mesh('ffimport', vertices, edges)
     else:
-        create_mesh('ffimport', vertices)
+        create_mesh('ffimport', vertices, [], polys)
 
     f.close()
 
