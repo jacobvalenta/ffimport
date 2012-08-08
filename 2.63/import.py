@@ -8,6 +8,7 @@ def load_p(filepath, debug):
     runtimeData = f.read(64) # usually not read, but may be used in export.
     header = struct.unpack('llllllllllllllll', header) # convert binary header to integers
 
+    #Break the header into variables
     version = header[0]
     vertexType = header[2]
     numVertices = header[3]
@@ -29,10 +30,20 @@ def load_p(filepath, debug):
         print('Edges: \t\t', numEdges)
         print('Faces: \t\t', numPolygons)
 
-    vertices = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
+    vertices = []
+
+    for i in range(numVertices):
+        # for the number of vertices, read float data for X, Y and Z and add them to the vertices list.
+        vertex = list(struct.unpack('fff', f.read(12)))
+        if debug == True:
+            print(vertex)
+        vertices.append(vertex)
+
+    #create a basic plane as a placeholder
+    #vertices = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
 
     NewMesh = bpy.data.meshes.new("Test")
-    NewMesh.from_pydata (vertices, [], [[0, 1, 2], [0, 2, 3]])
+    NewMesh.from_pydata (vertices, [], [])
     NewMesh.update()
     NewObj = bpy.data.objects.new("Test", NewMesh)
     bpy.context.scene.objects.link(NewObj)
@@ -73,8 +84,8 @@ class ffimport(Operator, ImportHelper):
     filename_ext = ".p" #Not quite sure how blender uses this
 
     filter_glob = StringProperty(
-            default="*.p",
-            options={'HIDDEN'},
+            default="*.p;*.hrc;*.tex;*.rsd;*.a", # Took a while to find, but use a ; to seperate file types :)
+            options={'HIDDEN'}
             )
 
     # Create the User interface 
