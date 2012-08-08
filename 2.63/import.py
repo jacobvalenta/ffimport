@@ -1,7 +1,7 @@
 import bpy
 import struct
 
-def load_p(filepath, debug):
+def load_p(filepath, debug, wireframe):
     f = open(filepath, 'rb')
 
     header = f.read(64)
@@ -17,9 +17,9 @@ def load_p(filepath, debug):
     numTexCoords = header[6]
     numVertexColors = header[7]
     numEdges = header[8]
-    numUnknown2 = header[9]
-    numUnknown3 = header[10]
-    numPolygons = header[11]
+    numUnknown2 = header[10]
+    numUnknown3 = header[11]
+    numPolygons = header[9]
     numHundreds = header[12]
     numGroups = header[13]
     numBoundingBoxes = header[14]
@@ -29,9 +29,10 @@ def load_p(filepath, debug):
         print('Verticies: \t', numVertices)
         print('Edges: \t\t', numEdges)
         print('Faces: \t\t', numPolygons)
+        print('NumUnknown: ', numUnknown1)
 
+    # Load Vertices
     vertices = []
-
     for i in range(numVertices):
         # for the number of vertices, read float data for X, Y and Z and add them to the vertices list.
         vertex = list(struct.unpack('fff', f.read(12)))
@@ -39,18 +40,33 @@ def load_p(filepath, debug):
             print(vertex)
         vertices.append(vertex)
 
-    #create a basic plane as a placeholder
-    #vertices = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
+    #Load Edges
+    edges = []
 
-    NewMesh = bpy.data.meshes.new("Test")
-    NewMesh.from_pydata (vertices, [], [])
-    NewMesh.update()
-    NewObj = bpy.data.objects.new("Test", NewMesh)
-    bpy.context.scene.objects.link(NewObj)
+    f.seek( 128 + (12 * numVertices) + (12 * numNormals) + (12 * numUnknown1) + (8 * numTexCoords) + (4 * numVertexColors) + (4 * numPolygons))
+
+    for i in range(numEdges):
+        edge = list(struct.unpack('hh', f.read(4)))
+        if debug == True:
+            print(edge)
+        edges.append(edge)
+
+    if wireframe == True:
+        create_mesh('ffimport', vertices, edges)
+    else:
+        create_mesh('ffimport', vertices)
 
     f.close()
 
-def start_import(context, filepath, debug):
+def create_mesh(name, vertices = [], edges=[], faces=[]):
+    importedMesh = bpy.data.meshes.new('name')
+    importedMesh.from_pydata(vertices, edges, faces)
+    importedMesh.update()
+
+    importedObject = bpy.data.objects.new(name, importedMesh)
+    bpy.context.scene.objects.link(importedObject)
+
+def start_import(context, filepath, debug, wireframe):
     #first thing first is to determin the type of file we are working with
     filepath = filepath.replace('\\', '/')
     filename = filepath.split('/')[-1]
@@ -62,7 +78,7 @@ def start_import(context, filepath, debug):
 
     #which ever filetype we are using, call the appropriate function
     if filetype == 'p':
-        load_p(filepath, debug)
+        load_p(filepath, debug, wireframe)
 
     return {'FINISHED'}
 
@@ -89,14 +105,11 @@ class ffimport(Operator, ImportHelper):
             )
 
     # Create the User interface 
-    debug_s = BoolProperty(
-            name="Debug",
-            description="Toggels debug info sent to the console.",
-            default=True,
-            )
+    debug_s = BoolProperty(name="Debug", description="Toggels debug info sent to the console.", default=True)
+    wireframe = BoolProperty(name="Wireframe", description="Loads only vertices and edges", default= False)
 
     def execute(self, context):
-        return start_import(context, self.filepath, self.debug_s)
+        return start_import(context, self.filepath, self.debug_s, self.wireframe)
 
 
 # Adds a listing in the Import menu
