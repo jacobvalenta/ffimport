@@ -29,6 +29,14 @@ def load_p(filepath, debug):
         print('Edges: \t\t', numEdges)
         print('Faces: \t\t', numPolygons)
 
+    vertices = [[1, 1, 0], [-1, 1, 0], [-1, -1, 0], [1, -1, 0]]
+
+    NewMesh = bpy.data.meshes.new("Test")
+    NewMesh.from_pydata (vertices, [], [[0, 1, 2], [0, 2, 3]])
+    NewMesh.update()
+    NewObj = bpy.data.objects.new("Test", NewMesh)
+    bpy.context.scene.objects.link(NewObj)
+
     f.close()
 
 def start_import(context, filepath, debug):
