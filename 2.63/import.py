@@ -1,5 +1,6 @@
 import bpy
 import struct
+import os.path
 
 def load_p(filepath, debug, wireframe):
     f = open(filepath, 'rb')
@@ -134,7 +135,14 @@ def load_rsd(filepath, debug, wireframe):
     currentDirectory = filepath[:-1 * (len(filename))]
 
     #load textures
-    #TODO
+    for texture in textureList:
+        if os.path.isfile(currentDirectory + texture):
+            print('found:', currentDirectory + texture)
+        elif os.path.isfile(currentDirectory + texture + '.tex'):
+            print('found:', currentDirectory + texture + '.tex')
+        else:
+            print("Could not find texture file")
+
 
     #Load Polygon files
     try:
