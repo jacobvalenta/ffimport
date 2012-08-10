@@ -4,9 +4,8 @@ import struct
 def load_p(filepath, debug, wireframe):
     f = open(filepath, 'rb')
 
-    header = f.read(64)
+    header = struct.unpack('llllllllllllllll', f.read(64)) #convert binary headers to integers
     runtimeData = f.read(64) # usually not read, but may be used in export.
-    header = struct.unpack('llllllllllllllll', header) # convert binary header to integers
 
     #Break the header into variables
     version = header[0]
@@ -46,24 +45,21 @@ def load_p(filepath, debug, wireframe):
     groups =     [struct.unpack("IIIIIIIIIIIIII",            f.read(0x38)) for i in range(numGroups)]
     boundingboxes = [struct.unpack("IIIIIII",                   f.read(0x1C)) for i in range(numBoundingBoxes)]    
 
+    f.close() #We're done here, move along
+
+    #grab usable data from polys
     polygons = []
+    for i in polygonsTmp:
+        polygons.append([i[1], i[2], i[3]])
 
-    for i in range(len(polygonsTmp)):
-        polygons.append([polygonsTmp[i][1], polygonsTmp[i][2], polygonsTmp[i][3]])
 
-    # Load Faces
-    #polys = []
-    #for i in range(numPolygons):
-    #    poly = list(struct.unpack('hhhhhhhhhhl', f.read(24)))
-    #    poly = [poly[1], poly[2], poly[3]]
-    #    if debug == True:
-    #        print(poly)
-    #    polys.append(poly)
+    # The start of materials will go here. (maybe?)
 
     #parse da groups ze correct way
     for i, group in enumerate(groups):
-        print('\n\nLoading group:\n')
-        print(group)
+        if debug == True:
+            print('\n\nLoading group:\n')
+            print(group)
         polyOffset = group[1]
         polyRange = group[2]
         vertexOffset = group[3]
@@ -88,23 +84,16 @@ def load_p(filepath, debug, wireframe):
         groupVertices = vertices[vertexOffset:(vertexRange + vertexOffset)]
         groupEdges = edges[edgeOffset: (edgeRange + edgeOffset)]
         groupPolygons = polygons[polyOffset : (polyRange+ polyOffset)]
-        print(groupVertices)
-        print('\n', groupPolygons)
 
-        print('adding to from_pydata')
+        #create an object out of what we just got
         ffMesh = bpy.data.meshes.new('ffimport' + str(i))
-        ffMesh.from_pydata(groupVertices, [], groupPolygons)
-        print('tring to update')
+        if wireframe == True:
+            ffMesh.from_pydata(groupVertices, groupEdges)
+        else:
+            ffMesh.from_pydata(groupVertices, [], groupPolygons)
         ffMesh.update()
         ffObject = bpy.data.objects.new('ffimport' + str(i), ffMesh)
         bpy.context.scene.objects.link(ffObject)
-        print('success!')
-
-
-    if wireframe == True:
-        create_mesh('ffimport', vertices, edges)
-#    else:
-#        create_mesh('ffimport', vertices, [], polys)
 
 
     # load materials
@@ -112,13 +101,11 @@ def load_p(filepath, debug, wireframe):
     #step 1: enumerate materials
 #        for i in range(num)
 
-    f.close()
-
 def start_import(context, filepath, debug, wireframe):
     #first thing first is to determin the type of file we are working with
     filepath = filepath.replace('\\', '/')
-    filename = filepath.split('/')[-1]
-    filetype = filename.split('.')[-1]
+    filename = filepath.split('/')[-1:]
+    filetype = filename.split('.')[-1:]
 
     if debug == True:
         print(filename)
