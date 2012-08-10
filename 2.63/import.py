@@ -103,7 +103,27 @@ def load_p(filepath, debug, wireframe):
 
 def load_rsd(filepath, debug, wireframe):
     f = open(filepath, 'rb')
-    print('Well look there, you opened an rsd')
+    lines = f.readlines()
+    print(lines)
+    for i,c in enumerate(lines):
+        if i == 0:
+            print(c[:4])
+            if c[:4] != b'@RSD':
+                print('File is not an RSD file, continuing anyways, no gaurentees')
+        else:
+        #    try:
+                if c[:1] == b'#':
+                    continue #this just ignores comments
+                if c[:3] == b'PLY':
+                    print('ply found')
+                    fileToLoad = c[4:8].decode().lower()
+                    print('P file to load:', fileToLoad)
+                    print(fileToLoad)
+                if c[:5] == 'NTEX=':
+                    numTextures = int(c[5:].strip('\r\n'))
+                    print(numTextures)
+        #    except:
+        #        continue
     f.close
 
 def start_import(context, filepath, debug, wireframe):
