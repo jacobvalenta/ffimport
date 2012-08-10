@@ -101,11 +101,16 @@ def load_p(filepath, debug, wireframe):
     #step 1: enumerate materials
 #        for i in range(num)
 
+def load_rsd(filepath, debug, wireframe):
+    f = open(filepath, 'rb')
+    print('Well look there, you opened an rsd')
+    f.close
+
 def start_import(context, filepath, debug, wireframe):
     #first thing first is to determin the type of file we are working with
-    filepath = filepath.replace('\\', '/')
-    filename = filepath.split('/')[-1:]
-    filetype = filename.split('.')[-1:]
+    filepath = filepath.replace('\\', '/') #just in case we are on a windows machine
+    filename = filepath.split('/')[-1]
+    filetype = filename.split('.')[-1]
 
     if debug == True:
         print(filename)
@@ -114,6 +119,8 @@ def start_import(context, filepath, debug, wireframe):
     #which ever filetype we are using, call the appropriate function
     if filetype == 'p':
         load_p(filepath, debug, wireframe)
+    if filetype == 'rsd':
+        load_rsd(filepath, debug, wireframe)
 
     return {'FINISHED'}
 
