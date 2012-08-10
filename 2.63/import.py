@@ -25,6 +25,7 @@ def load_p(filepath, debug, wireframe):
     normIndexTableFlag = header[15]
 
     if debug == True:
+        print('\nLoading Polygon Model\n')
         print('Verticies: \t', numVertices)
         print('Edges: \t\t', numEdges)
         print('Faces: \t\t', numPolygons)
@@ -102,29 +103,47 @@ def load_p(filepath, debug, wireframe):
 #        for i in range(num)
 
 def load_rsd(filepath, debug, wireframe):
-    f = open(filepath, 'rb')
+    f = open(filepath, 'r')
     lines = f.readlines()
     print(lines)
+    textureList = []
     for i,c in enumerate(lines):
         if i == 0:
             print(c[:4])
-            if c[:4] != b'@RSD':
+            if c[:4] != '@RSD':
                 print('File is not an RSD file, continuing anyways, no gaurentees')
         else:
-        #    try:
-                if c[:1] == b'#':
+            try:
+                if c[:1] == '#':
                     continue #this just ignores comments
-                if c[:3] == b'PLY':
+                if c[:3] == 'PLY':
                     print('ply found')
-                    fileToLoad = c[4:8].decode().lower()
-                    print('P file to load:', fileToLoad)
-                    print(fileToLoad)
+                    fileToLoad = c[4:8].lower()
+                    print('P file to load:', fileToLoad) # discover which .p file to use
                 if c[:5] == 'NTEX=':
                     numTextures = int(c[5:].strip('\r\n'))
-                    print(numTextures)
-        #    except:
-        #        continue
+                    print(numTextures) # find the number of textures used
+                if c[:4] == 'TEX[':
+                    textureList.append(c[7:11].lower())
+            except:
+                continue
+    print(textureList)
     f.close
+
+    filename = filepath.split('/')[-1]
+    currentDirectory = filepath[:-1 * (len(filename))]
+
+    #load textures
+    #TODO
+
+    #Load Polygon files
+    try:
+        load_p(currentDirectory + fileToLoad, debug, wireframe)
+    except:
+        load_p(currentDirectory + fileToLoad + '.p', debug, wireframe)
+    else:
+        print('The polygon file linked to this file could not be found.')
+
 
 def start_import(context, filepath, debug, wireframe):
     #first thing first is to determin the type of file we are working with
