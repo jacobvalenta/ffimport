@@ -29,49 +29,90 @@ def load_p(filepath, debug, wireframe):
         print('Verticies: \t', numVertices)
         print('Edges: \t\t', numEdges)
         print('Faces: \t\t', numPolygons)
-        print('NumUnknown: ', numUnknown1)
+        print('NumUnknown: \t', numUnknown1)
 
-    # Load Vertices
-    vertices = []
-    for i in range(numVertices):
-        # for the number of vertices, read float data for X, Y and Z and add them to the vertices list.
-        vertex = list(struct.unpack('fff', f.read(12)))
-        if debug == True:
-            print(vertex)
-        vertices.append(vertex)
+    # Loaded in all the parts of the file. Taken from code posted by Aali :)
+    vertices =   [list(struct.unpack("fff",                       f.read(0xC)))  for i in range(numVertices)]
+    normals =    [struct.unpack("fff",                       f.read(0xC))  for i in range(numNormals)]
+    unknown1 =   [struct.unpack("fff",                       f.read(0xC))  for i in range(numUnknown1)]
+    texcoords =  [struct.unpack("ff",                        f.read(0x8))  for i in range(numTexCoords)]
+    vertcolors = [struct.unpack("I",                         f.read(0x4))  for i in range(numVertexColors)]
+    polycolors = [struct.unpack("I",                         f.read(0x4))  for i in range(numPolygons)]
+    edges =      [list(struct.unpack("hh",                         f.read(0x4)))  for i in range(numEdges)]
+    polygonsTmp =   [struct.unpack("HHHHHHHHHHI",               f.read(0x18)) for i in range(numPolygons)]
+    unknown2 =   [struct.unpack("HHHHHHHHHHI",               f.read(0x18)) for i in range(numUnknown2)]
+    unknown3 =   [struct.unpack("BBB",                       f.read(0x3))  for i in range(numUnknown3)]
+    hundreds =   [struct.unpack("IIIIIIIIIIIIIIIIIIIIIIIII", f.read(0x64)) for i in range(numHundreds)]
+    groups =     [struct.unpack("IIIIIIIIIIIIII",            f.read(0x38)) for i in range(numGroups)]
+    boundingboxes = [struct.unpack("IIIIIII",                   f.read(0x1C)) for i in range(numBoundingBoxes)]    
 
-    #Load Edges
-    edges = []
-    f.seek( 128 + (12 * numVertices) + (12 * numNormals) + (12 * numUnknown1) + (8 * numTexCoords) + (4 * numVertexColors) + (4 * numPolygons))
-    for i in range(numEdges):
-        edge = list(struct.unpack('hh', f.read(4)))
-        if debug == True:
-            print(edge)
-        edges.append(edge)
+    polygons = []
+
+    for i in range(len(polygonsTmp)):
+        polygons.append([polygonsTmp[i][1], polygonsTmp[i][2], polygonsTmp[i][3]])
 
     # Load Faces
-    polys = []
-    for i in range(numPolygons):
-        poly = list(struct.unpack('hhhhhhhhhhl', f.read(24)))
-        poly = [poly[1], poly[2], poly[3]]
+    #polys = []
+    #for i in range(numPolygons):
+    #    poly = list(struct.unpack('hhhhhhhhhhl', f.read(24)))
+    #    poly = [poly[1], poly[2], poly[3]]
+    #    if debug == True:
+    #        print(poly)
+    #    polys.append(poly)
+
+    #parse da groups ze correct way
+    for i, group in enumerate(groups):
+        print('\n\nLoading group:\n')
+        print(group)
+        polyOffset = group[1]
+        polyRange = group[2]
+        vertexOffset = group[3]
+        vertexRange = group[4]
+        edgeOffset = group[5]
+        edgeRange = group[6]
+
+        textureOffset = group[11]
+        isTextured = bool(group[12])
+
         if debug == True:
-            print(poly)
-        polys.append(poly)
+            print('Vertex Offset: \t', vertexOffset)
+            print('Vertex Range: \t', vertexRange)
+            print('Edge Offset: \t', edgeOffset)
+            print('Edge Range: \t', edgeRange)
+            print('Polygon Offset: ', polyOffset)
+            print('Poly Range: \t', polyRange)
+            print('Textured: \t', isTextured)
+            print('Texture Offset: ', textureOffset, '\n')
+
+        #generate verts and faces for this group
+        groupVertices = vertices[vertexOffset:(vertexRange + vertexOffset)]
+        groupEdges = edges[edgeOffset: (edgeRange + edgeOffset)]
+        groupPolygons = polygons[polyOffset : (polyRange+ polyOffset)]
+        print(groupVertices)
+        print('\n', groupPolygons)
+
+        print('adding to from_pydata')
+        ffMesh = bpy.data.meshes.new('ffimport' + str(i))
+        ffMesh.from_pydata(groupVertices, [], groupPolygons)
+        print('tring to update')
+        ffMesh.update()
+        ffObject = bpy.data.objects.new('ffimport' + str(i), ffMesh)
+        bpy.context.scene.objects.link(ffObject)
+        print('success!')
+
 
     if wireframe == True:
         create_mesh('ffimport', vertices, edges)
-    else:
-        create_mesh('ffimport', vertices, [], polys)
+#    else:
+#        create_mesh('ffimport', vertices, [], polys)
+
+
+    # load materials
+
+    #step 1: enumerate materials
+#        for i in range(num)
 
     f.close()
-
-def create_mesh(name, vertices = [], edges=[], faces=[]):
-    importedMesh = bpy.data.meshes.new('name')
-    importedMesh.from_pydata(vertices, edges, faces)
-    importedMesh.update()
-
-    importedObject = bpy.data.objects.new(name, importedMesh)
-    bpy.context.scene.objects.link(importedObject)
 
 def start_import(context, filepath, debug, wireframe):
     #first thing first is to determin the type of file we are working with
