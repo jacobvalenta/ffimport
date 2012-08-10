@@ -60,8 +60,7 @@ def load_p(filepath, debug, wireframe):
     #parse da groups ze correct way
     for i, group in enumerate(groups):
         if debug == True:
-            print('\n\nLoading group:\n')
-            print(group)
+            print('\nLoading group:\n')
         polyOffset = group[1]
         polyRange = group[2]
         vertexOffset = group[3]
@@ -80,7 +79,7 @@ def load_p(filepath, debug, wireframe):
             print('Polygon Offset: ', polyOffset)
             print('Poly Range: \t', polyRange)
             print('Textured: \t', isTextured)
-            print('Texture Offset: ', textureOffset, '\n')
+            print('Texture Offset: ', textureOffset)
 
         #generate verts and faces for this group
         groupVertices = vertices[vertexOffset:(vertexRange + vertexOffset)]
@@ -103,14 +102,19 @@ def load_p(filepath, debug, wireframe):
     #step 1: enumerate materials
 #        for i in range(num)
 
+def load_tex(filepath, debug):
+    if debug == True:
+        print('\nimporting texture')
+    print('loading:', filepath)
+
 def load_rsd(filepath, debug, wireframe):
+    if debug == True:
+        print('\nImporting Resource Data file\n')
     f = open(filepath, 'r')
     lines = f.readlines()
-    print(lines)
     textureList = []
     for i,c in enumerate(lines):
         if i == 0:
-            print(c[:4])
             if c[:4] != '@RSD':
                 print('File is not an RSD file, continuing anyways, no gaurentees')
         else:
@@ -118,17 +122,17 @@ def load_rsd(filepath, debug, wireframe):
                 if c[:1] == '#':
                     continue #this just ignores comments
                 if c[:3] == 'PLY':
-                    print('ply found')
                     fileToLoad = c[4:8].lower()
-                    print('P file to load:', fileToLoad) # discover which .p file to use
+                    if debug == True:
+                        print('P file to load:', fileToLoad) # discover which .p file to use
                 if c[:5] == 'NTEX=':
                     numTextures = int(c[5:].strip('\r\n'))
-                    print(numTextures) # find the number of textures used
+                    if debug == True:
+                        print('Textures associated:', numTextures) # find the number of textures used
                 if c[:4] == 'TEX[':
                     textureList.append(c[7:11].lower())
             except:
                 continue
-    print(textureList)
     f.close
 
     filename = filepath.split('/')[-1]
@@ -137,31 +141,29 @@ def load_rsd(filepath, debug, wireframe):
     #load textures
     for texture in textureList:
         if os.path.isfile(currentDirectory + texture):
-            print('found:', currentDirectory + texture)
+            load_tex(currentDirectory + texture, debug)
         elif os.path.isfile(currentDirectory + texture + '.tex'):
-            print('found:', currentDirectory + texture + '.tex')
+            load_tex(currentDirectory + texture + '.tex', debug)
         else:
             print("Could not find texture file")
 
 
     #Load Polygon files
-    try:
+    if os.path.isfile(currentDirectory + fileToLoad):
         load_p(currentDirectory + fileToLoad, debug, wireframe)
-    except:
+    elif os.path.isfile(currentDirectory + fileToLoad + '.p'):
         load_p(currentDirectory + fileToLoad + '.p', debug, wireframe)
     else:
         print('The polygon file linked to this file could not be found.')
 
 
 def start_import(context, filepath, debug, wireframe):
+    if debug == True:
+        print('Starting ffimport')
     #first thing first is to determin the type of file we are working with
     filepath = filepath.replace('\\', '/') #just in case we are on a windows machine
     filename = filepath.split('/')[-1]
     filetype = filename.split('.')[-1]
-
-    if debug == True:
-        print(filename)
-        print(filetype)
 
     #which ever filetype we are using, call the appropriate function
     if filetype == 'p':
