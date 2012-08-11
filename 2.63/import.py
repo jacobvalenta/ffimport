@@ -123,8 +123,6 @@ def load_p(filepath, debug, wireframe):
         groupPolygons = polygons[polyOffset : (polyRange+ polyOffset)]
         groupPolyColors = polycolors[polyOffset : (polyRange + polyOffset)]
 
-        print('materials of these faces:', groupPolyColors)
-
         #create an object out of what we just got
         ffMesh = bpy.data.meshes.new('ffimport' + str(i))
         if wireframe == True:
@@ -135,11 +133,42 @@ def load_p(filepath, debug, wireframe):
         ffObject = bpy.data.objects.new('ffimport' + str(i), ffMesh)
         bpy.context.scene.objects.link(ffObject)
 
-    #setp 2: make a list of vertices belonging to each material
 
-    #step 3: create vertex groups
+        # Load materials for this group
+        #This was coding in close proximity to mountindew and asprin
+        for ni, material in enumerate(materials):
+            materialName = '%x%x%x%x' % material
+            if debug == True:
+                print(materialName)
+            polyGroup = []
+            vertexGroup = []
+            for i, polymat in enumerate(groupPolyColors):
+                if polymat == material:
+                    polyGroup.append(i)
+            for poly in polyGroup:
+                for vertex in groupPolygons[poly]:
+                    if vertex not in vertexGroup:
+                        vertexGroup.append(vertex)
+            weightedGroup = [] #Weights not nessisary, clean up later
+            for vertex in vertexGroup:
+                weightedGroup.append((vertex, 1.0))
+            print('what the vertex group looks like:', weightedGroup)
+            group = ffObject.vertex_groups.new(materialName)
+            for vertex, weight in weightedGroup:
+                group.add([vertex], weight, 'REPLACE')
+            print(ni)
+            ffObject.data.materials.append(internalMaterials[ni])
 
-    #step 4: create materials
+            #assign material to group
+            print('entering edit mdoe')
+            bpy.ops.object.mode_set(mode='EDIT')
+            print('deselecting')
+            bpy.ops.mesh.select_all(action='DESELECT')
+            print('setting active vertex group')
+            bpy.ops.object.vertex_group_set_active(group=materialname)
+            bpy.ops.object.vertex_group_select()
+            bpy.ops.object.material_slot_assign()
+            bpy.ops.object.mode_set(mode='OBJECT')
 
     #step 5: assign materials
 
