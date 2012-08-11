@@ -157,17 +157,26 @@ def load_p(filepath, debug, wireframe):
             for vertex, weight in weightedGroup:
                 group.add([vertex], weight, 'REPLACE')
             print(ni)
-            ffObject.data.materials.append(internalMaterials[ni])
 
             #assign material to group
+            #bpy.ops.object.vertex_group_set_active(group=materialName)
+
+            bpy.context.scene.objects.active = ffObject
             print('entering edit mdoe')
             bpy.ops.object.mode_set(mode='EDIT')
-            print('deselecting')
+            print('Holy crap, that worked?')
             bpy.ops.mesh.select_all(action='DESELECT')
-            print('setting active vertex group')
-            bpy.ops.object.vertex_group_set_active(group=materialname)
+            print('setting active vertex group:')
+            bpy.ops.object.vertex_group_set_active(group=materialName)
+            print('print selecting the vertex group')
             bpy.ops.object.vertex_group_select()
+            print('adding new material')
+            bpy.ops.object.material_slot_add()
+            print('add material to new slot')
+            bpy.context.object.material_slots[-1].material = internalMaterials[ni]
+            print('assigning the material')
             bpy.ops.object.material_slot_assign()
+            print('switching to object mode')
             bpy.ops.object.mode_set(mode='OBJECT')
 
     #step 5: assign materials
