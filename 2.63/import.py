@@ -38,7 +38,7 @@ def load_p(filepath, debug, wireframe):
     unknown1 =   [struct.unpack("fff",                       f.read(0xC))  for i in range(numUnknown1)]
     texcoords =  [struct.unpack("ff",                        f.read(0x8))  for i in range(numTexCoords)]
     vertcolors = [struct.unpack("I",                         f.read(0x4))  for i in range(numVertexColors)]
-    polycolors = [struct.unpack("I",                         f.read(0x4))  for i in range(numPolygons)]
+    polycolors = [struct.unpack("BBBB",                         f.read(0x4))  for i in range(numPolygons)]
     edges =      [list(struct.unpack("hh",                         f.read(0x4)))  for i in range(numEdges)]
     polygonsTmp =   [struct.unpack("HHHHHHHHHHI",               f.read(0x18)) for i in range(numPolygons)]
     unknown2 =   [struct.unpack("HHHHHHHHHHI",               f.read(0x18)) for i in range(numUnknown2)]
@@ -55,7 +55,43 @@ def load_p(filepath, debug, wireframe):
         polygons.append([i[1], i[2], i[3]])
 
 
-    # The start of materials will go here. (maybe?)
+    #Blender materials create now, applied within poly groups
+    #enumerate materials
+    if debug == True:
+        print('Generating Materials')
+    materials = []
+    internalMaterials = []
+
+    for i in polycolors:
+        if i not in materials:
+            materials.append(i)
+
+    print ('done')
+
+    #create materials
+    for material in materials:
+        materialName = '%x%x%x%x' % material
+
+        if debug == True:
+            print('Creating Material:', materialName)
+
+
+        blenderMaterial = bpy.data.materials.new(materialName)
+
+        red = (material[2] / 255)
+        green = (material[1] / 255)
+        blue = (material[0] / 255)
+        alpha = (material[3] /255)
+
+        blenderMaterial.diffuse_color = (red, green, blue)
+        blenderMaterial.diffuse_shader = 'LAMBERT'
+        blenderMaterial.diffuse_intensity = 1.0
+        blenderMaterial.specular_color = (1, 1, 1)
+        blenderMaterial.specular_shader = 'COOKTORR'
+        blenderMaterial.specular_intensity = 0.0
+        blenderMaterial.alpha = (alpha)
+        blenderMaterial.ambient = 1
+        internalMaterials.append(blenderMaterial)
 
     #parse da groups ze correct way
     for i, group in enumerate(groups):
@@ -85,6 +121,9 @@ def load_p(filepath, debug, wireframe):
         groupVertices = vertices[vertexOffset:(vertexRange + vertexOffset)]
         groupEdges = edges[edgeOffset: (edgeRange + edgeOffset)]
         groupPolygons = polygons[polyOffset : (polyRange+ polyOffset)]
+        groupPolyColors = polycolors[polyOffset : (polyRange + polyOffset)]
+
+        print('materials of these faces:', groupPolyColors)
 
         #create an object out of what we just got
         ffMesh = bpy.data.meshes.new('ffimport' + str(i))
@@ -96,16 +135,49 @@ def load_p(filepath, debug, wireframe):
         ffObject = bpy.data.objects.new('ffimport' + str(i), ffMesh)
         bpy.context.scene.objects.link(ffObject)
 
+    #setp 2: make a list of vertices belonging to each material
 
-    # load materials
+    #step 3: create vertex groups
 
-    #step 1: enumerate materials
-#        for i in range(num)
+    #step 4: create materials
+
+    #step 5: assign materials
 
 def load_tex(filepath, debug):
     if debug == True:
         print('\nimporting texture')
-    print('loading:', filepath)
+
+    f = open(filepath, 'rb')
+
+    # :( This is Going to be a HUGE function
+
+    #load header
+    header = list(struct.unpack('lllllllllllllllllllllllllll', f.read(108)))
+
+    #Wait for it....
+
+    if debug == True:
+        print('Version:', header[0])
+        print('Color key flag:', bool(header[2]))
+        print('D3D Minimum Bit depth:', header[5])
+        print('Maximum bit depth:', header[6])
+        print('minimum alpha bits:', header[7])
+        print('Maximume alpha bits:', header[8])
+        print('Minimun bits per pixel:', header[9])
+        print('Maximum bits per pixel:', header[10])
+        print('Number of Pallets:', header[11])
+        #There's more...
+
+        #so help me God...
+
+
+    bmpHeader = b'\x42\x4d'
+    bmpHeader += b'\x00\x00\x00\x00'
+    bmpHeader += b'\x00\x00'
+    bmpHeader += b'\x00\x00'
+    bmpHeader += b'\x36\x00\x00\x00'
+
+    f.close()
 
 def load_rsd(filepath, debug, wireframe):
     if debug == True:
