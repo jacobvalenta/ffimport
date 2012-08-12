@@ -2,6 +2,9 @@ import bpy
 import struct
 import os.path
 from mathutils import Vector
+from bpy_extras.io_utils import ImportHelper
+from bpy.props import StringProperty, BoolProperty, EnumProperty
+from bpy.types import Operator
 
 def load_p(filepath, debug, wireframe = False, loadMaterials = True):
     f = open(filepath, 'rb')
@@ -222,7 +225,6 @@ def load_hrc(filepath, debug, wireframe, loadMaterials):
 
         #link models to this bone
 
-
 def load_tex(filepath, debug):
     if debug == True:
         print('\nimporting texture')
@@ -322,7 +324,6 @@ def load_rsd(filepath, debug, wireframe = False, loadMaterials = True):
     else:
         print('The polygon file linked to this file could not be found.')
 
-
 def start_import(context, filepath, debug, wireframe, loadMaterials):
     if debug == True:
         print('Starting ffimport')
@@ -342,14 +343,6 @@ def start_import(context, filepath, debug, wireframe, loadMaterials):
         load_hrc(filepath, debug, wireframe, loadMaterials)
 
     return {'FINISHED'}
-
-
-# ImportHelper is a helper class, defines filename and
-# invoke() function which calls the file selector.
-from bpy_extras.io_utils import ImportHelper
-from bpy.props import StringProperty, BoolProperty, EnumProperty
-from bpy.types import Operator
-
 
 
 #main class to setup import window for blender
@@ -373,11 +366,9 @@ class ffimport(Operator, ImportHelper):
     def execute(self, context):
         return start_import(context, self.filepath, self.debug_s, self.wireframe, self.loadMaterials)
 
-
 # Adds a listing in the Import menu
 def menu_func_import(self, context):
     self.layout.operator(ffimport.bl_idname, text="Final Fantasy")
-
 
 def register():
     bpy.utils.register_class(ffimport)
