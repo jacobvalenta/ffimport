@@ -1,6 +1,7 @@
 import bpy
 import struct
 import os.path
+from mathutils import Vector
 
 def load_p(filepath, debug, wireframe = False, loadMaterials = True):
     f = open(filepath, 'rb')
@@ -175,6 +176,53 @@ def load_p(filepath, debug, wireframe = False, loadMaterials = True):
         #load UV data
         #I have been searching for 8 hours... no luck
 
+def load_hrc(filepath, debug, wireframe, loadMaterials):
+    if debug == True:
+        print('\nReading Skeleton File\n')
+
+    f = open(filepath, 'r')
+
+    #Read header info
+    header = [f.readline() for i in range(3)]
+    SkeletonName = header[1].strip('\n')[10:]
+    numberBones = int(header[2].strip('\n')[7:])
+    if debug == True:
+        print('Importing:', SkeletonName)
+        print('Number of Bones:', numberBones)
+
+    bones = [[f.readline().strip('\n') for a in range(5)] for i in range(numberBones)]
+    f.close()
+
+    #create armature
+    bpy.ops.object.add(type="ARMATURE", enter_editmode=True)
+    object = bpy.context.object
+    object.name = SkeletonName
+    armature = object.data
+    armature.name = SkeletonName
+
+    #create root bone, which is the orgin for all bones of a model
+    bpy.ops.object.mode_set(mode='EDIT')
+    bone = armature.edit_bones.new("root")
+    bone.head = Vector((0.0, 1.0, 0.0))
+    bone.tail = Vector((0.0, 0.0, 0.0))
+
+
+    for dataBone in bones:
+        name = dataBone[1]
+        parent = dataBone[2]
+        length = float(dataBone[3])
+        resources = dataBone[4].split(' ')[0]
+
+        #add bone to armature
+        bone = armature.edit_bones.new(name)
+        parentBone = armature.edit_bones[parent]
+        bone.parent =  parentBone
+        bone.head = parentBone.tail
+        bone.tail = Vector((0.0, parentBone.tail[1] + length, 0.0))
+
+        #link models to this bone
+
+
 def load_tex(filepath, debug):
     if debug == True:
         print('\nimporting texture')
@@ -286,8 +334,12 @@ def start_import(context, filepath, debug, wireframe, loadMaterials):
     #which ever filetype we are using, call the appropriate function
     if filetype == 'p':
         load_p(filepath, debug, wireframe, loadMaterials)
-    if filetype == 'rsd':
+    elif filetype == 'rsd':
         load_rsd(filepath, debug, wireframe, loadMaterials)
+    elif filetype == 'tex':
+        load_tex(filepath, debug)
+    elif filetype == 'hrc':
+        load_hrc(filepath, debug, wireframe, loadMaterials)
 
     return {'FINISHED'}
 
