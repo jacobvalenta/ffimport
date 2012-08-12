@@ -6,7 +6,7 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.props import StringProperty, BoolProperty, EnumProperty
 from bpy.types import Operator
 
-def load_p(filepath, debug, wireframe = False, loadMaterials = True):
+def load_p(filepath, debug = True, wireframe = False, loadMaterials = True, loadTextures = True):
     f = open(filepath, 'rb')
 
     header = struct.unpack('llllllllllllllll', f.read(64)) #convert binary headers to integers
@@ -34,6 +34,7 @@ def load_p(filepath, debug, wireframe = False, loadMaterials = True):
         print('Verticies: \t', numVertices)
         print('Edges: \t\t', numEdges)
         print('Faces: \t\t', numPolygons)
+        print('Texture Coords:', numTexCoords)
         print('NumUnknown: \t', numUnknown1)
 
     # Loaded in all the parts of the file. Taken from code posted by Aali :)
@@ -110,7 +111,8 @@ def load_p(filepath, debug, wireframe = False, loadMaterials = True):
         edgeRange = group[6]
         textureOffset = group[11]
         isTextured = bool(group[12])
-        textureRange = group[13]
+        textureRange = vertexRange
+        textureIndex = group[13]
 
         if debug == True:
             print('Vertex Offset: \t', vertexOffset)
@@ -121,13 +123,14 @@ def load_p(filepath, debug, wireframe = False, loadMaterials = True):
             print('Poly Range: \t', polyRange)
             print('Textured: \t', isTextured)
             print('Texture Offset: ', textureOffset)
-            print('Texture Range: \t', textureRange)
+            print('Texture Index: \t', textureIndex)
 
-        #generate verts and faces for this group
+        #generate verts, edges, faces, colors, and texture coordinates for this group
         groupVertices = vertices[vertexOffset:(vertexRange + vertexOffset)]
         groupEdges = edges[edgeOffset: (edgeRange + edgeOffset)]
         groupPolygons = polygons[polyOffset : (polyRange+ polyOffset)]
         groupPolyColors = polycolors[polyOffset : (polyRange + polyOffset)]
+        groupTextureCoords = texcoords[textureOffset : (textureRange + textureOffset)]
 
         #create an object out of what we just got
         ffMesh = bpy.data.meshes.new('ffimport' + str(i))
@@ -178,6 +181,16 @@ def load_p(filepath, debug, wireframe = False, loadMaterials = True):
 
         #load UV data
         #I have been searching for 8 hours... no luck
+        if isTextured and loadTextures:
+            bpy.ops.mesh.uv_texture_add()
+            uvLayer = ffMesh.uv_layers.active
+
+            index = 0
+            for face in groupPolygons:
+                for vertex in face:
+                    print(texcoords[vertex])
+                    uvLayer.data[index].uv = Vector(texcoords[vertex])
+                    index += 1
 
 def load_hrc(filepath, debug, wireframe, loadMaterials):
     if debug == True:
