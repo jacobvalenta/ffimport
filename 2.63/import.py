@@ -2,7 +2,7 @@ import bpy
 import struct
 import os.path
 
-def load_p(filepath, debug, wireframe = False, loadMaterials = True):
+def load_p(filepath, debug, wireframe):
     f = open(filepath, 'rb')
 
     header = struct.unpack('llllllllllllllll', f.read(64)) #convert binary headers to integers
@@ -57,42 +57,41 @@ def load_p(filepath, debug, wireframe = False, loadMaterials = True):
 
     #Blender materials create now, applied within poly groups
     #enumerate materials
-    if loadMaterials == True:
+    if debug == True:
+        print('Generating Materials')
+    materials = []
+    internalMaterials = []
+
+    for i in polycolors:
+        if i not in materials:
+            materials.append(i)
+
+    print ('done')
+
+    #create materials
+    for material in materials:
+        materialName = '%x%x%x%x' % material
+
         if debug == True:
-            print('Generating Materials')
-        materials = []
-        internalMaterials = []
-
-        for i in polycolors:
-            if i not in materials:
-                materials.append(i)
-
-        print ('done')
-
-        #create materials
-        for material in materials:
-            materialName = '%x%x%x%x' % material
-
-            if debug == True:
-                print('Creating Material:', materialName)
+            print('Creating Material:', materialName)
 
 
-            blenderMaterial = bpy.data.materials.new(materialName)
+        blenderMaterial = bpy.data.materials.new(materialName)
 
-            red = (material[2] / 255)
-            green = (material[1] / 255)
-            blue = (material[0] / 255)
-            alpha = (material[3] /255)
+        red = (material[2] / 255)
+        green = (material[1] / 255)
+        blue = (material[0] / 255)
+        alpha = (material[3] /255)
 
-            blenderMaterial.diffuse_color = (red, green, blue)
-            blenderMaterial.diffuse_shader = 'LAMBERT'
-            blenderMaterial.diffuse_intensity = 1.0
-            blenderMaterial.specular_color = (1, 1, 1)
-            blenderMaterial.specular_shader = 'COOKTORR'
-            blenderMaterial.specular_intensity = 0.0
-            blenderMaterial.alpha = (alpha)
-            blenderMaterial.ambient = 1
-            internalMaterials.append(blenderMaterial)
+        blenderMaterial.diffuse_color = (red, green, blue)
+        blenderMaterial.diffuse_shader = 'LAMBERT'
+        blenderMaterial.diffuse_intensity = 1.0
+        blenderMaterial.specular_color = (1, 1, 1)
+        blenderMaterial.specular_shader = 'COOKTORR'
+        blenderMaterial.specular_intensity = 0.0
+        blenderMaterial.alpha = (alpha)
+        blenderMaterial.ambient = 1
+        internalMaterials.append(blenderMaterial)
 
     #parse da groups ze correct way
     for i, group in enumerate(groups):
@@ -104,9 +103,9 @@ def load_p(filepath, debug, wireframe = False, loadMaterials = True):
         vertexRange = group[4]
         edgeOffset = group[5]
         edgeRange = group[6]
+
         textureOffset = group[11]
         isTextured = bool(group[12])
-        textureRange = group[13]
 
         if debug == True:
             print('Vertex Offset: \t', vertexOffset)
@@ -117,7 +116,6 @@ def load_p(filepath, debug, wireframe = False, loadMaterials = True):
             print('Poly Range: \t', polyRange)
             print('Textured: \t', isTextured)
             print('Texture Offset: ', textureOffset)
-            print('Texture Range: \t', textureRange)
 
         #generate verts and faces for this group
         groupVertices = vertices[vertexOffset:(vertexRange + vertexOffset)]
@@ -138,42 +136,50 @@ def load_p(filepath, debug, wireframe = False, loadMaterials = True):
 
         # Load materials for this group
         #This was coding in close proximity to mountindew and asprin
-        if loadMaterials == True:
-            for ni, material in enumerate(materials):
-                materialName = '%x%x%x%x' % material
-                if debug == True:
-                    print('Material and vertex group name:', materialName)
-                polyGroup = []
-                vertexGroup = []
-                for i, polymat in enumerate(groupPolyColors):
-                    if polymat == material:
-                        polyGroup.append(i)
-                for poly in polyGroup:
-                    for vertex in groupPolygons[poly]:
-                        if vertex not in vertexGroup:
-                            vertexGroup.append(vertex)
-                weightedGroup = [] #Weights not nessisary, clean up later
-                for vertex in vertexGroup:
-                    weightedGroup.append((vertex, 1.0))
-                group = ffObject.vertex_groups.new(materialName)
-                for vertex, weight in weightedGroup:
-                    group.add([vertex], weight, 'REPLACE')
+        for ni, material in enumerate(materials):
+            materialName = '%x%x%x%x' % material
+            if debug == True:
+                print(materialName)
+            polyGroup = []
+            vertexGroup = []
+            for i, polymat in enumerate(groupPolyColors):
+                if polymat == material:
+                    polyGroup.append(i)
+            for poly in polyGroup:
+                for vertex in groupPolygons[poly]:
+                    if vertex not in vertexGroup:
+                        vertexGroup.append(vertex)
+            weightedGroup = [] #Weights not nessisary, clean up later
+            for vertex in vertexGroup:
+                weightedGroup.append((vertex, 1.0))
+            print('what the vertex group looks like:', weightedGroup)
+            group = ffObject.vertex_groups.new(materialName)
+            for vertex, weight in weightedGroup:
+                group.add([vertex], weight, 'REPLACE')
+            print(ni)
 
-                #assign material to group; it works and I have no idea why
-                #TODO :| just found bpy.data.objects[].active_material_index....
+            #assign material to group
+            #bpy.ops.object.vertex_group_set_active(group=materialName)
 
-                bpy.context.scene.objects.active = ffObject
-                bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.mesh.select_all(action='DESELECT')
-                bpy.ops.object.vertex_group_set_active(group=materialName)
-                bpy.ops.object.vertex_group_select()
-                bpy.ops.object.material_slot_add()
-                bpy.context.object.material_slots[-1].material = internalMaterials[ni]
-                bpy.ops.object.material_slot_assign()
-                bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.context.scene.objects.active = ffObject
+            print('entering edit mdoe')
+            bpy.ops.object.mode_set(mode='EDIT')
+            print('Holy crap, that worked?')
+            bpy.ops.mesh.select_all(action='DESELECT')
+            print('setting active vertex group:')
+            bpy.ops.object.vertex_group_set_active(group=materialName)
+            print('print selecting the vertex group')
+            bpy.ops.object.vertex_group_select()
+            print('adding new material')
+            bpy.ops.object.material_slot_add()
+            print('add material to new slot')
+            bpy.context.object.material_slots[-1].material = internalMaterials[ni]
+            print('assigning the material')
+            bpy.ops.object.material_slot_assign()
+            print('switching to object mode')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
-        #load UV data
-        #I have been searching for 8 hours... no luck
+    #step 5: assign materials
 
 def load_tex(filepath, debug):
     if debug == True:
@@ -188,32 +194,18 @@ def load_tex(filepath, debug):
 
     #Wait for it....
 
-    colorKeyFlag = bool(header[2])
-    numberOfPallets = header[12]
-    colorsPerPallet = header[13]
-    bitDepth = header[14]
-    imageWidth = header[15]
-    imageHeight = header[16]
-    palletFlag = bool(header[19])
-    bitsPerIndex = header[20]
-    palletSize = header[22]
-
     if debug == True:
-        print('Version:\t\t\t', header[0])
-        print('Color key flag:\t\t\t', bool(header[2]))
-        print('D3D Minimum Bit depth:\t\t', header[5])
-        print('Maximum bit depth:\t\t', header[6])
-        print('minimum alpha bits:\t\t', header[7])
-        print('Maximume alpha bits:\t\t', header[8])
-        print('Minimun bits per pixel:\t\t', header[9])
-        print('Maximum bits per pixel:\t\t', header[10])
-        print('Number of Pallets:\t\t', header[12])
+        print('Version:', header[0])
+        print('Color key flag:', bool(header[2]))
+        print('D3D Minimum Bit depth:', header[5])
+        print('Maximum bit depth:', header[6])
+        print('minimum alpha bits:', header[7])
+        print('Maximume alpha bits:', header[8])
+        print('Minimun bits per pixel:', header[9])
+        print('Maximum bits per pixel:', header[10])
+        print('Number of Pallets:', header[11])
         #There's more...
-        print('Number of Colors Per Pallet:\t', header[13])
-        print('Bit Depth:', header[14])
-        print('Image Width:', header[15])
-        print('Image Height:', header[16])
-        print('Pitch: ', header[17])
+
         #so help me God...
 
 
@@ -225,7 +217,7 @@ def load_tex(filepath, debug):
 
     f.close()
 
-def load_rsd(filepath, debug, wireframe = False, loadMaterials = True):
+def load_rsd(filepath, debug, wireframe):
     if debug == True:
         print('\nImporting Resource Data file\n')
     f = open(filepath, 'r')
@@ -268,14 +260,14 @@ def load_rsd(filepath, debug, wireframe = False, loadMaterials = True):
 
     #Load Polygon files
     if os.path.isfile(currentDirectory + fileToLoad):
-        load_p(currentDirectory + fileToLoad, debug, wireframe, loadMaterials)
+        load_p(currentDirectory + fileToLoad, debug, wireframe)
     elif os.path.isfile(currentDirectory + fileToLoad + '.p'):
-        load_p(currentDirectory + fileToLoad + '.p', debug, wireframe, loadMaterials)
+        load_p(currentDirectory + fileToLoad + '.p', debug, wireframe)
     else:
         print('The polygon file linked to this file could not be found.')
 
 
-def start_import(context, filepath, debug, wireframe, loadMaterials):
+def start_import(context, filepath, debug, wireframe):
     if debug == True:
         print('Starting ffimport')
     #first thing first is to determin the type of file we are working with
@@ -285,9 +277,9 @@ def start_import(context, filepath, debug, wireframe, loadMaterials):
 
     #which ever filetype we are using, call the appropriate function
     if filetype == 'p':
-        load_p(filepath, debug, wireframe, loadMaterials)
+        load_p(filepath, debug, wireframe)
     if filetype == 'rsd':
-        load_rsd(filepath, debug, wireframe, loadMaterials)
+        load_rsd(filepath, debug, wireframe)
 
     return {'FINISHED'}
 
@@ -316,10 +308,9 @@ class ffimport(Operator, ImportHelper):
     # Create the User interface 
     debug_s = BoolProperty(name="Debug", description="Toggels debug info sent to the console.", default=True)
     wireframe = BoolProperty(name="Wireframe", description="Loads only vertices and edges", default= False)
-    loadMaterials = BoolProperty(name="Load Materials", description="Loads material data associated with polygons", default=True)
 
     def execute(self, context):
-        return start_import(context, self.filepath, self.debug_s, self.wireframe, self.loadMaterials)
+        return start_import(context, self.filepath, self.debug_s, self.wireframe)
 
 
 # Adds a listing in the Import menu
