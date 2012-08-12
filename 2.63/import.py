@@ -189,7 +189,7 @@ def load_p(filepath, debug = True, wireframe = False, loadMaterials = True, load
             for face in groupPolygons:
                 for vertex in face:
                     print(texcoords[vertex])
-                    uvLayer.data[index].uv = Vector(texcoords[vertex + textureOffset])
+                    uvLayer.data[index].uv = Vector(texcoords[vertex + textureOffset][0], -1 * (texcoords[vertex + textureOffset][1])
                     index += 1
 
 def load_hrc(filepath, debug, wireframe, loadMaterials):
