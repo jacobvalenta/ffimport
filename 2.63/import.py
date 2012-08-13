@@ -292,7 +292,7 @@ def load_tex(filepath, debug):
 
     f.close()
 
-def load_rsd(filepath, debug, wireframe = False, loadMaterials = True):
+def load_rsd(filepath, debug, wireframe = False, loadMaterials = True, loadTextures = True):
     if debug == True:
         print('\nImporting Resource Data file\n')
     f = open(filepath, 'r')
@@ -341,7 +341,7 @@ def load_rsd(filepath, debug, wireframe = False, loadMaterials = True):
     else:
         print('The polygon file linked to this file could not be found.')
 
-def start_import(context, filepath, debug, wireframe, loadMaterials):
+def start_import(context, filepath, debug, wireframe, loadMaterials, loadTextures = True):
     if debug == True:
         print('Starting ffimport')
     #first thing first is to determin the type of file we are working with
@@ -379,9 +379,10 @@ class ffimport(Operator, ImportHelper):
     debug_s = BoolProperty(name="Debug", description="Toggels debug info sent to the console.", default=True)
     wireframe = BoolProperty(name="Wireframe", description="Loads only vertices and edges", default= False)
     loadMaterials = BoolProperty(name="Load Materials", description="Loads material data associated with polygons", default=True)
+    loadTextures = BoolProperty(name="Load Textures", description="Loads the texture data associated with this file", default=True)
 
     def execute(self, context):
-        return start_import(context, self.filepath, self.debug_s, self.wireframe, self.loadMaterials)
+        return start_import(context, self.filepath, self.debug_s, self.wireframe, self.loadMaterials, self.loadTextures)
 
 # Adds a listing in the Import menu
 def menu_func_import(self, context):
