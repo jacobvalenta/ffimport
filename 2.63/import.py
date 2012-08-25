@@ -6,6 +6,8 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.props import StringProperty, BoolProperty, EnumProperty
 from bpy.types import Operator
 
+#This file is getting pretty large, after I get full functionality, I may break it up into a class and stuff.
+
 def load_p(filepath, debug = True, wireframe = False, loadMaterials = True, loadTextures = True):
     f = open(filepath, 'rb')
 
@@ -284,7 +286,7 @@ def load_tex(filepath, debug):
         #so help me God...
 
 
-    bmpHeader = b'\x42\x4d'
+    bmpHeader = b'\x42\x4d'  #BM
     bmpHeader += b'\x00\x00\x00\x00'
     bmpHeader += b'\x00\x00'
     bmpHeader += b'\x00\x00'
