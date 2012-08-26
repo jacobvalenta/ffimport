@@ -1,4 +1,4 @@
-class bmp():
+class Bmp():
 	'''Easily creates bmp files given pixel data'''
 	def __init__(self):
 		pass
@@ -12,7 +12,7 @@ class bmp():
 		pass
 
 if __name__ == '__main__':
-	image = bmp()
+	image = Bmp()
 	image.data((
 				(0, 0, 0), (1, 0, 0), (1, 1, 0),
 				(0, 1, 1), (0, 0, 1), (1, 1, 1)
