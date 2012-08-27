@@ -1,5 +1,4 @@
 from struct import unpack, pack
-from math import floor
 
 class BitmapError(Exception):
 	def __init__(self, message):
@@ -49,6 +48,9 @@ class BMP():
 		self.file.write(self.BMPHeader + self.DIBHeader + self.bitmapData)
 		self.file.close()
 
+	def load(self, filename):
+		'''Loads Bitmap data from specified file'''
+		pass
 
 if __name__ == '__main__':
 	image = BMP()
