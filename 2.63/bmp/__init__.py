@@ -8,6 +8,7 @@ class BitmapError(Exception):
 class BMP():
 	'''Easily creates BMP files given pixel data; Warning, I am fragile. Do not try using me as a real BMP library'''
 	def __init__(self):
+		#add defuatls
 		self.width = 0
 		self.height = 0
 
@@ -39,7 +40,6 @@ class BMP():
 					self.alpha = round(pixel[3] * 15)	#This just makes alpha optional.
 				except:
 					self.alpha = 15 					#Otherwise, full opacity.
-				print(self.red, self.green, self.blue, self.alpha)
 				self.bitmapData += pack('>H', self.red + self.green + self.blue + self.alpha)
 			self.bitmapData += pack('b', 0) * self.paddingBytes
 

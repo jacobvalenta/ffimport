@@ -32,8 +32,6 @@ class TEX():
 				self.pixel[0], self.pixel[2] = self.pixel[2], self.pixel[0] #This is a poor subsitute for a bitmask. I need to rewrite this so it will truly read tex files.
 				self.pallet.append(self.pixel)
 
-		print(self.pallet)
-
 		self.data = []
 
 		for rows in range(self.height):

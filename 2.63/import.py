@@ -247,15 +247,22 @@ def load_hrc(filepath, debug, wireframe, loadMaterials):
         #link models to this bone
 
 def load_tex(filepath, debug):
+    afilepath = filepath.split('/')
+    output = '/' + '/'.join(afilepath[1:-1]) + '/' +''.join(afilepath[-1].split('.')[:-1]) + '.bmp'
     if debug == True:
         print('\nimporting texture')
+        print(output)
 
     fftexture = tex.TEX()
-    fftexture.load(filepath)
-
+    print('created tex object')
+    fftexture.load(filepath) #Load the data to from the texture
+    print('loaded texture')
     ffbitmap = bmp.BMP()
-    ffbitmap.data(fftexture.data)
-    ffbitmap.save('/Users/Jacob/convert.bmp')
+    print('created bitmap object')
+    ffbitmap.data(fftexture.data) #load the texture data into bitmap data
+    print('loaded bitmap data')
+    ffbitmap.save(output) #save
+    print('done')
 
 def load_rsd(filepath, debug, wireframe = False, loadMaterials = True, loadTextures = True):
     if debug == True:
