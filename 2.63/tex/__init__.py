@@ -28,10 +28,22 @@ class TEX():
 		self.pallet = []
 		if self.pallets > 0:
 			for i in range(self.colorsPerPallet):
-				self.pallet.append((unpack('B', self.file.read(1))[0]/255, unpack('B', self.file.read(1))[0]/255, unpack('B', self.file.read(1))[0]/255, unpack('B', self.file.read(1))[0]/255))
-		self.file.close()
+				self.pixel = list((unpack('B', self.file.read(1))[0]/255, unpack('B', self.file.read(1))[0]/255, unpack('B', self.file.read(1))[0]/255, unpack('B', self.file.read(1))[0]/255))
+				self.pixel[0], self.pixel[2] = self.pixel[2], self.pixel[0] #This is a poor subsitute for a bitmask. I need to rewrite this so it will truly read tex files.
+				self.pallet.append(self.pixel)
 
-		self.data = self.pallet
+		print(self.pallet)
+
+		self.data = []
+
+		for rows in range(self.height):
+			self.row = []
+			for pixels in range(self.width):
+				self.pixel = self.pallet[ unpack('B', self.file.read(1))[0] ]
+				self.row.append(self.pixel)
+			self.data.append(self.row)
+
+		self.file.close()
 
 if __name__ == '__main__':
 	myImage = TEX()
