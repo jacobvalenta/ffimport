@@ -5,6 +5,8 @@ from mathutils import Vector
 from bpy_extras.io_utils import ImportHelper
 from bpy.props import StringProperty, BoolProperty, EnumProperty
 from bpy.types import Operator
+import bmp
+import tex
 
 #This file is getting pretty large, after I get full functionality, I may break it up into a class and stuff.
 
@@ -248,51 +250,12 @@ def load_tex(filepath, debug):
     if debug == True:
         print('\nimporting texture')
 
-    f = open(filepath, 'rb')
+    fftexture = tex.TEX()
+    fftexture.load(filepath)
 
-    # :( This is Going to be a HUGE function
-
-    #load header
-    header = list(struct.unpack('lllllllllllllllllllllllllll', f.read(108)))
-
-    #Wait for it....
-
-    colorKeyFlag = bool(header[2])
-    numberOfPallets = header[12]
-    colorsPerPallet = header[13]
-    bitDepth = header[14]
-    imageWidth = header[15]
-    imageHeight = header[16]
-    palletFlag = bool(header[19])
-    bitsPerIndex = header[20]
-    palletSize = header[22]
-
-    if debug == True:
-        print('Version:\t\t\t', header[0])
-        print('Color key flag:\t\t\t', bool(header[2]))
-        print('D3D Minimum Bit depth:\t\t', header[5])
-        print('Maximum bit depth:\t\t', header[6])
-        print('minimum alpha bits:\t\t', header[7])
-        print('Maximume alpha bits:\t\t', header[8])
-        print('Minimun bits per pixel:\t\t', header[9])
-        print('Maximum bits per pixel:\t\t', header[10])
-        print('Number of Pallets:\t\t', header[12])
-        #There's more...
-        print('Number of Colors Per Pallet:\t', header[13])
-        print('Bit Depth:', header[14])
-        print('Image Width:', header[15])
-        print('Image Height:', header[16])
-        print('Pitch: ', header[17])
-        #so help me God...
-
-
-    bmpHeader = b'\x42\x4d'  #BM
-    bmpHeader += b'\x00\x00\x00\x00'
-    bmpHeader += b'\x00\x00'
-    bmpHeader += b'\x00\x00'
-    bmpHeader += b'\x36\x00\x00\x00'
-
-    f.close()
+    ffbitmap = bmp.BMP()
+    ffbitmap.data(fftexture.data)
+    ffbitmap.save('/Users/Jacob/convert.bmp')
 
 def load_rsd(filepath, debug, wireframe = False, loadMaterials = True, loadTextures = True):
     if debug == True:

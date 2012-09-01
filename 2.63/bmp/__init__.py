@@ -24,7 +24,6 @@ class BMP():
 		self.paddingBytes = (self.width * 2) % 4
 		self.arrayLength = ((self.width * 2) + self.paddingBytes) * self.height
 		self.fileLength = 122 + self.arrayLength
-		print(self.fileLength)
 
 		#construct BMP header
 		self.BMPHeader = pack('=bblll', 66, 77, self.fileLength, 0, 122)
@@ -40,7 +39,7 @@ class BMP():
 					self.alpha = round(pixel[3] * 15)	#This just makes alpha optional.
 				except:
 					self.alpha = 15 					#Otherwise, full opacity.
-				
+				print(self.red, self.green, self.blue, self.alpha)
 				self.bitmapData += pack('>H', self.red + self.green + self.blue + self.alpha)
 			self.bitmapData += pack('b', 0) * self.paddingBytes
 
@@ -50,12 +49,19 @@ class BMP():
 
 	def load(self, filename):
 		'''Loads Bitmap data from specified file'''
-		pass
+		self.f = open(filename, 'rb')
+
+		self.f.close() 
 
 if __name__ == '__main__':
 	image = BMP()
+	# image.data((
+	# 			((0, 0, 0, 0), (1, 0, 0, 0.5), (1, 1, 0, 0.5)),
+	# 			((0, 1, 1, 0), (0, 0, 1, 0.5), (1, 1, 1, 1))
+	# 			))
 	image.data((
-				((0, 0, 0, 0), (1, 0, 0, 0.5), (1, 1, 0, 0.5)),
-				((0, 1, 1, 0), (0, 0, 1, 0.5), (1, 1, 1, 1))
+				((0.0, 0.0, 0.0, 0.0)),
+				((0.06, 0.06, 0.06, 1.0)),
+				((0.25, 0.125, 0.06, 0.99))
 				))
 	image.save('myPicture.bmp')
