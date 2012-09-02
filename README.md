@@ -1,4 +1,4 @@
-ffimport [v0.3]
+ffimport [v0.4]
 ==============
 ffimport is a <i>Blender 3D 2.6x</i> import/export plugin. With it, it brings the power to import extracted game files from <i>Final Fantasy VII</i> and allows the models to be easily edited and animated. To import a full model (including bones), import a .hrc file. This will automaticly assemble the model and skelton structure. To import the animation data for the skeleton, import a .a file. By defualt, this will load materials and textures and texture coordinates for the model.
 
