@@ -10,7 +10,7 @@ import tex
 
 #This file is getting pretty large, after I get full functionality, I may break it up into a class and stuff.
 
-def load_p(filepath, debug = True, wireframe = False, loadMaterials = True, loadTextures = True):
+def load_p(filepath, debug = True, wireframe = False, loadMaterials = True, loadTextures = True, textures = []):
     f = open(filepath, 'rb')
 
     header = struct.unpack('llllllllllllllll', f.read(64)) #convert binary headers to integers
@@ -200,6 +200,10 @@ def load_p(filepath, debug = True, wireframe = False, loadMaterials = True, load
                     uvLayer.data[index].uv = Vector((u, v))
                     index += 1
 
+            for f in ffMesh.uv_textures[0].data:
+                print(textureIndex)
+                f.image = textures[textureIndex]
+
 def load_hrc(filepath, debug, wireframe, loadMaterials):
     if debug == True:
         print('\nReading Skeleton File\n')
@@ -248,21 +252,33 @@ def load_hrc(filepath, debug, wireframe, loadMaterials):
 
 def load_tex(filepath, debug):
     afilepath = filepath.split('/')
-    output = '/' + '/'.join(afilepath[1:-1]) + '/' +''.join(afilepath[-1].split('.')[:-1]) + '.bmp'
+    print('a file path')
+    filename = ''.join(afilepath[-1].split('.')[:-1]) + '.bmp'
+    print('filename')
+    output = '/' + '/'.join(afilepath[1:-1]) + '/' + filename
+    print('output')
     if debug == True:
         print('\nimporting texture')
         print(output)
 
     fftexture = tex.TEX()
-    print('created tex object')
     fftexture.load(filepath) #Load the data to from the texture
-    print('loaded texture')
-    ffbitmap = bmp.BMP()
-    print('created bitmap object')
-    ffbitmap.data(fftexture.data) #load the texture data into bitmap data
-    print('loaded bitmap data')
-    ffbitmap.save(output) #save
-    print('done')
+
+    blenderImage = bpy.data.images.new(name=filename, width=fftexture.width, height=fftexture.height)
+
+    #convert image data to blender data
+    blenderData = []
+
+    for row in reversed(fftexture.data):
+        for pixel in row:
+            for value in pixel:
+                blenderData.append(value)
+            if len(pixel) ==3:
+                blenderData.append(1.0)
+
+    blenderImage.pixels = blenderData
+
+    return blenderImage
 
 def load_rsd(filepath, debug, wireframe = False, loadMaterials = True, loadTextures = True):
     if debug == True:
@@ -296,20 +312,21 @@ def load_rsd(filepath, debug, wireframe = False, loadMaterials = True, loadTextu
     currentDirectory = filepath[:-1 * (len(filename))]
 
     #load textures
+    textures = []
     for texture in textureList:
         if os.path.isfile(currentDirectory + texture):
-            load_tex(currentDirectory + texture, debug)
+            textures.append(load_tex(currentDirectory + texture, debug))
         elif os.path.isfile(currentDirectory + texture + '.tex'):
-            load_tex(currentDirectory + texture + '.tex', debug)
+            textures.append(load_tex(currentDirectory + texture + '.tex', debug))
         else:
             print("Could not find texture file")
 
 
     #Load Polygon files
     if os.path.isfile(currentDirectory + fileToLoad):
-        load_p(currentDirectory + fileToLoad, debug, wireframe, loadMaterials)
+        load_p(currentDirectory + fileToLoad, debug, wireframe, loadMaterials, textures = textures)
     elif os.path.isfile(currentDirectory + fileToLoad + '.p'):
-        load_p(currentDirectory + fileToLoad + '.p', debug, wireframe, loadMaterials)
+        load_p(currentDirectory + fileToLoad + '.p', debug, wireframe, loadMaterials, textures = textures)
     else:
         print('The polygon file linked to this file could not be found.')
 
