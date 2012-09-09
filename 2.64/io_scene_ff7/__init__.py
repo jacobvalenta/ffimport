@@ -4,10 +4,10 @@ bl_info = {
     "blender": (2, 6, 4),
     "location": "File > Import-Export",
     "description": "Brings support for import/export of Final Fantasy VII files",
-    "warning": "Export doesnt work",
-    "wiki_url": "",
+    "warning": "",
+    "wiki_url": "www.github.com/jacobvalenta/ffimport",
     "tracker_url": "",
-    "support": 'OFFICIAL',
+    "support": 'COMMUNITY',
     "category": "Import-Export"}
 
 import bpy
@@ -23,11 +23,11 @@ from bpy_extras.io_utils import (ExportHelper,
                                  )
 
 
-class ImportOBJ(bpy.types.Operator, ImportHelper):
+class ImportFF7(bpy.types.Operator, ImportHelper):
     '''Load a Final Fantasy VII file'''
     bl_idname = "import_scene.ff7"
     bl_label = "Import FF7"
-    bl_options = {'PRESET', 'UNDO'}
+    bl_options = {'UNDO'}
 
     filename_ext = ".hrc"
     filter_glob = StringProperty(
@@ -42,32 +42,28 @@ class ImportOBJ(bpy.types.Operator, ImportHelper):
             )
 
     def execute(self, context):
-        #from . import import_obj
+        #from . import import_ff7
 
+        print(self.filename)
         return {'FINISHED'}
-        #return import_obj.load(self, context, **keywords)
+        #return import_ff7.load(self, context, **keywords)
 
-    def draw(self, context):
-        layout = self.layout
+    # def draw(self, context):
+    #     layout = self.layout
 
-        row = layout.row(align=True)
-        row.prop(self, "simpleBool")
+    #     row = layout.row(align=True)
+    #     row.prop(self, "simpleBool")
 
 
 
 
 class ExportOBJ(bpy.types.Operator, ExportHelper):
-    '''Save a Wavefront OBJ File'''
-
+    '''Save a Final Fantasy VII File'''
     bl_idname = "export_scene.ff7"
     bl_label = 'Export FF7'
     bl_options = {'PRESET'}
-
     filename_ext = ".hrc"
-    filter_glob = StringProperty(
-            default="*.hrc;*.p",
-            options={'HIDDEN'},
-            )
+    filter_glob = StringProperty(default="*.hrc;*.p", options={'HIDDEN'},)
 
     # context group
     myBool = BoolProperty(
@@ -77,27 +73,23 @@ class ExportOBJ(bpy.types.Operator, ExportHelper):
             )
 
     def execute(self, context):
-        #from . import export_obj
-
+        #from . import export_ff7
         return {'FINISHED'}
         #return export_obj.save(self, context, **keywords)
 
 
 
 def menu_func_import(self, context):
-    self.layout.operator(ImportOBJ.bl_idname, text="Final Fantasy VII")
-
+    self.layout.operator(ImportFF7.bl_idname, text="Final Fantasy VII")
 
 def menu_func_export(self, context):
-    self.layout.operator(ExportOBJ.bl_idname, text="Final Fantasy VII")
-
+    self.layout.operator(ExportFF7.bl_idname, text="Final Fantasy VII")
 
 def register():
     bpy.utils.register_module(__name__)
 
     bpy.types.INFO_MT_file_import.append(menu_func_import)
     bpy.types.INFO_MT_file_export.append(menu_func_export)
-
 
 def unregister():
     bpy.utils.unregister_module(__name__)
