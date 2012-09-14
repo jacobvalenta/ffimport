@@ -35,18 +35,17 @@ class ImportFF7(bpy.types.Operator, ImportHelper):
             options={'HIDDEN'},
             )
 
-    simpleBool = BoolProperty(
-            name="test",
+    debug = BoolProperty(
+            name="Debug",
             description="Import faces with more than 4 verts as fgons",
             default=True,
             )
 
     def execute(self, context):
-        #from . import import_ff7
+        from . import import_ff7
 
         print(self.filename)
-        return {'FINISHED'}
-        #return import_ff7.load(self, context, **keywords)
+        return import_ff7.load(self, self.filename, self.debug)
 
     # def draw(self, context):
     #     layout = self.layout
