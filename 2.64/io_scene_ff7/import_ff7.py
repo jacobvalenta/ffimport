@@ -1,7 +1,9 @@
+import struct
+
 def load(context, filepath, debug):
 	'''Fuction to initiate the loading process for files. Used to establish file type and which load fuction that should be used.'''
 	#This function will receive mroe parameters as I add functionality back to 2.64
-	global debug #looking back on it, I dont know why I even added this
+	global debug #looking back on it, I dont know why I even added this... maybe I did this so I didnt have to pass it to the other load functions
 	debug = debug
 
 	#disect the filepath
@@ -11,7 +13,7 @@ def load(context, filepath, debug):
 
     #elementary filetype testing
     if filetype == 'p':
-    	load_p()
+    	load_p(filepath)
     #will add more when I add a bit more functionality
 
     #Secondary filetype tests: battle models which do not have file extentions
@@ -25,9 +27,20 @@ def debug(message):
 	if debug == True:
 		print(message) #makes it so I dont have to keep typing if debug == True:
 
-def load_p():
+def load_p(filepath):
 	'''A function for importing polygon files from Final Fantasy VII'''
 	debug('Starting load_p()')
+
+	f = open(filepath)
+
+	header = struct.unpack('lllllllllllll', f.read(64)) #convert binary headers to integers
+
+	data = {'VERSION': header[0]
+			'VERTEX TYPE': header[2]}
+
+
+	f.close()
+
 	pass
 
 def load_rsd():
