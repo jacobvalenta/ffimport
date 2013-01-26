@@ -332,69 +332,69 @@ def load_rsd(filepath, debug, wireframe = False, loadMaterials = True, loadTextu
     else:
         print('The polygon file linked to this file could not be found.')
 
-def load_bot(filepath, debug, wireframe = False):
-    if debug == True:
-        print('Loading World Map File')
-    with open(filepath, 'rb') as f:
-        data = None
-        counter = 0
-        while data != b'':
-            data = f.read(47104)
-            if data == b'':
-                break
-            meshes  = list(struct.unpack('llllllllllllllll', data[0:64]))
+# def load_bot(filepath, debug, wireframe = False):
+#     if debug == True:
+#         print('Loading World Map File')
+#     with open(filepath, 'rb') as f:
+#         data = None
+#         counter = 0
+#         while data != b'':
+#             data = f.read(47104)
+#             if data == b'':
+#                 break
+#             meshes  = list(struct.unpack('llllllllllllllll', data[0:64]))
 
-            for i in range(len(meshes)):
-                offset = meshes[i]
-                length = struct.unpack('l', data[offset:offset+4])[0]
-                mesh = data[ offset+4 : offset+4 + length]
+#             for i in range(len(meshes)):
+#                 offset = meshes[i]
+#                 length = struct.unpack('l', data[offset:offset+4])[0]
+#                 mesh = data[ offset+4 : offset+4 + length]
 
-                print(uncompress_lz77(mesh), '\n\n')
+#                 print(uncompress_lz77(mesh), '\n\n')
 
-            # if debug == True:
-            #     print('Reading chunk')
-            # data = f.read(47103)
-            # meshes = list(struct.unpack('llllllllllllllll', f.read(64)))
-            # print(meshes)
+#             # if debug == True:
+#             #     print('Reading chunk')
+#             # data = f.read(47103)
+#             # meshes = list(struct.unpack('llllllllllllllll', f.read(64)))
+#             # print(meshes)
 
-            # for i in range(len(meshes)):
-            #     offset = meshes[i]
-            #     bytes = data[offset:offset+4]
-            #     print(len(bytes))
-            #     print( 'Compressed data length', struct.unpack('l', data[offset:offset+4])[0] )
-            # print('exited for')
+#             # for i in range(len(meshes)):
+#             #     offset = meshes[i]
+#             #     bytes = data[offset:offset+4]
+#             #     print(len(bytes))
+#             #     print( 'Compressed data length', struct.unpack('l', data[offset:offset+4])[0] )
+#             # print('exited for')
 
 
-def uncompress_lz77(data):
-    print(os.getcwd())
-    oStream = io.BytesIO()
-    iStream = io.BytesIO(data)
+# def uncompress_lz77(data):
+#     print(os.getcwd())
+#     oStream = io.BytesIO()
+#     iStream = io.BytesIO(data)
 
-    # while True:
-    #     literal = False
-    #     reference = True
-    #     byte = iStream.read(1)
-    #     if byte == b'':
-    #         break
-    #     controlByte = [bool(ord(byte) & 0b00000001),
-    #                    bool(ord(byte) & 0b00000010),
-    #                    bool(ord(byte) & 0b00000100),
-    #                    bool(ord(byte) & 0b00001000),
-    #                    bool(ord(byte) & 0b00010000),
-    #                    bool(ord(byte) & 0b00100000),
-    #                    bool(ord(byte) & 0b01000000),
-    #                    bool(ord(byte) & 0b10000000)]
-    #     print(controlByte)
-    #     for i in range(8):
-    #         if controlByte[i] == literal:
-    #             oStream.write(iStream.read(1))
-    #         elif controlByte[i] == reference:
-    #             ref1 = iStream.read(1)
-    #             ref2 = iStream.read(1)
-    #             offset = (ord(ref1) << 8) + (ord(ref2) & 0b11110000)
-    #             length = (ord(ref2) & 0b00001111) + 3
-    #     if controlByte[2] == False:
-    #         break
+#     # while True:
+#     #     literal = False
+#     #     reference = True
+#     #     byte = iStream.read(1)
+#     #     if byte == b'':
+#     #         break
+#     #     controlByte = [bool(ord(byte) & 0b00000001),
+#     #                    bool(ord(byte) & 0b00000010),
+#     #                    bool(ord(byte) & 0b00000100),
+#     #                    bool(ord(byte) & 0b00001000),
+#     #                    bool(ord(byte) & 0b00010000),
+#     #                    bool(ord(byte) & 0b00100000),
+#     #                    bool(ord(byte) & 0b01000000),
+#     #                    bool(ord(byte) & 0b10000000)]
+#     #     print(controlByte)
+#     #     for i in range(8):
+#     #         if controlByte[i] == literal:
+#     #             oStream.write(iStream.read(1))
+#     #         elif controlByte[i] == reference:
+#     #             ref1 = iStream.read(1)
+#     #             ref2 = iStream.read(1)
+#     #             offset = (ord(ref1) << 8) + (ord(ref2) & 0b11110000)
+#     #             length = (ord(ref2) & 0b00001111) + 3
+#     #     if controlByte[2] == False:
+#     #         break
 
 
 
