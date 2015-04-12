@@ -1,9 +1,11 @@
-ffimport [v0.4]
-==============
-ffimport is a <i>Blender 3D 2.6x</i> import/export plugin. With it, it brings the power to import extracted game files from <i>Final Fantasy VII</i> and allows the models to be easily edited and animated. To import a full model (including bones), import a .hrc file. This will automaticly assemble the model and skelton structure. To import the animation data for the skeleton, import a .a file. By defualt, this will load materials and textures and texture coordinates for the model.
+# ffimport [v0.4]
 
-To install this plugin
 
-browse to <i>/ffimport/2.6x/</i> and copy the <b>bmp</b> and <b>tex</b> folders to your blender installation <i>/Blender Foundation/blender/2.6x/python/lib/</i>
+ffimport is a <i>Blender 3D 2.7x</i> import/export plugin. With it, it brings the power to import extracted game files from <i>Final Fantasy VII</i> and allows the models to be easily edited and animated. Options allow for selective importing of components, such as wireframe, materials, textures and texture coordinates.
 
-Open a text editor window inside blender and run the import.py script.
+To import a full model (including bones), import a .hrc file. This file points to other files (polygon & textures) and will automaticly assemble the model and skelton structure. To import the animation data for the skeleton, import a .a file.
+
+## Installation
+
+Copy or symlink `io_scene_ff7` to `$BlenderFolder/2.65/Scripts/addons/`. Launch Blender, open user preferences, go to the addons tab, find 'Final Fantasy VII Format' and enable it.
+

@@ -1,11 +1,11 @@
 bl_info = {
     "name": "Final Fantasy VII Format",
     "author": "Jacob Valenta (jacob.valenta@gmail.com)",
-    "blender": (2, 6, 5),
+    "blender": (2, 7, 3),
     "location": "File > Import-Export",
-    "description": "Brings support for import/export of Final Fantasy VII files",
+    "description": "Adds support for import/export of Final Fantasy VII files",
     "warning": "",
-    "wiki_url": "www.github.com/jacobvalenta/ffimport",
+    "wiki_url": "www.github.com/jacobvalenta/ffimport/",
     "tracker_url": "",
     "support": 'COMMUNITY',
     "category": "Import-Export"}
@@ -43,7 +43,7 @@ class ImportFF7(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         from . import import_ff7
-        return import_ff7.load(self, self.filename, self.debug)
+        return import_ff7.load(self.properties)
 
     # def draw(self, context):
     #     layout = self.layout
